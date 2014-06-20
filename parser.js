@@ -65,6 +65,22 @@ for (var i in setupMessagesByType) {
   setupMessageDataByType[i] = setupMessageDataByType[i].slice(0, setupMessageDataByType[i].length - 1);
 }
 
+console.log(setupMessagesByType);
+console.log();
+
+console.log('GAP')
+
+var gattData = setupMessageDataByType[16];
+
+var advertisingDataGeneralBitmap = gattData[51];
+
+console.log('\tadvertising data general bitmap = 0x%s', advertisingDataGeneralBitmap.toString(16));
+if (advertisingDataGeneralBitmap & 0x10) {
+  console.log('\t\tadvertise complete local name');
+}
+
+console.log();
+
 console.log('GATT');
 
 var gattData = setupMessageDataByType[32];

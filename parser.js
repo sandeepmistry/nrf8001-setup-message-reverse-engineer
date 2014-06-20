@@ -73,10 +73,13 @@ console.log('GAP')
 var gattData = setupMessageDataByType[16];
 
 var advertisingDataGeneralBitmap = gattData[51];
+var shortenedLocalNameLength = gattData[15];
 
 console.log('\tadvertising data general bitmap = 0x%s', advertisingDataGeneralBitmap.toString(16));
 if (advertisingDataGeneralBitmap & 0x10) {
   console.log('\t\tadvertise complete local name');
+} else if (advertisingDataGeneralBitmap & 0x20) {
+  console.log('\t\tadvertise shortened local name, length = %d', shortenedLocalNameLength);
 }
 
 console.log();

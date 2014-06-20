@@ -106,10 +106,10 @@ while (i < gattData.length) {
 
   if (uuid === 0x2800) {
     // service
-    console.log('\t\tservice: 0x%s', data.readUInt16LE(0).toString(16));
+    console.log('\t\tservice: 0x%s', data.toString('hex').match(/.{1,2}/g).reverse().join(''));
   } else if (uuid === 0x2803) {
     // characteristic
-    console.log('\t\tcharacteristic: 0x%s', data.readUInt16LE(3).toString(16));
+    console.log('\t\tcharacteristic: 0x%s', data.slice(3).toString('hex').match(/.{1,2}/g).reverse().join(''));
     console.log('\t\tvalue handle: 0x%s', data.readUInt16LE(1).toString(16));
   } else {
     // value

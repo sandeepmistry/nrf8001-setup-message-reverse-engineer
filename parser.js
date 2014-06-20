@@ -73,6 +73,8 @@ console.log('GAP')
 var gattData = setupMessageDataByType[16];
 
 var advertisingDataGeneralBitmap = gattData[51];
+var advertisingDataGeneralScanResponseBitmap = gattData[69];
+
 var shortenedLocalNameLength = gattData[15];
 
 console.log('\tadvertising data general bitmap = 0x%s', advertisingDataGeneralBitmap.toString(16));
@@ -82,6 +84,12 @@ if (advertisingDataGeneralBitmap & 0x10) {
   console.log('\t\tadvertise shortened local name, length = %d', shortenedLocalNameLength);
 }
 
+console.log('\tadvertising data general scan response bitmap = 0x%s', advertisingDataGeneralScanResponseBitmap.toString(16));
+if (advertisingDataGeneralScanResponseBitmap & 0x10) {
+  console.log('\t\tscan response complete local name');
+} else if (advertisingDataGeneralScanResponseBitmap & 0x20) {
+  console.log('\t\tscan response shortened local name, length = %d', shortenedLocalNameLength);
+}
 console.log();
 
 console.log('GATT');

@@ -1,5 +1,7 @@
 var fs = require('fs');
 
+var crc = require('crc');
+
 var inputFile = process.argv[2];
 
 if (!inputFile) {
@@ -17,12 +19,13 @@ if (!fs.existsSync(inputFile)) {
 var input = fs.readFileSync(inputFile).toString();
 
 input = input.replace(/\n|\r/g, '');
-input = input.replace(/.+ \[Setup Data\] /, '');
+input = input.replace(/.+\[Setup Data\] /, '');
 input = input.replace(/-/g, '');
 
 // console.log('Input = %s', input);
 
 var inputBuffer = new Buffer(input, 'hex');
+
 var setupMessages = [];
 
 var i = 0;
@@ -58,6 +61,67 @@ var setupMessageDataByType = {};
 
 for (var i in setupMessagesByType) {
   setupMessageDataByType[i] = Buffer.concat(setupMessagesByType[i]);
+
+  setupMessageDataByType[i] = setupMessageDataByType[i].slice(0, setupMessageDataByType[i].length - 1);
 }
 
-console.log(setupMessageDataByType);
+console.log('GATT');
+
+var gattData = setupMessageDataByType[32];
+
+i = 0;
+while (i < gattData.length) {
+  var properties = gattData[i];
+  i++;
+
+  var permissions = gattData[i];
+  i++;
+
+  var length = gattData[i];
+  i++;
+
+  var valueLength = gattData[i];
+  i++;
+
+  var handle = gattData.readUInt16BE(i);
+  i += 2;
+
+  var uuid = gattData.readUInt16BE(i);
+  i += 2;
+
+  var spacer = gattData[i];
+  i++;
+
+  var dataLength = (properties === 6) ? valueLength : length;
+  var data = gattData.slice(i, i + dataLength);
+  i += dataLength;
+
+  console.log('\tproperties = %d', properties);
+  console.log('\tpermissions = %d', permissions);
+  console.log('\tlength = %d', length);
+  console.log('\tvalue length = %d', valueLength);
+  console.log('\thandle = 0x%s', handle.toString(16));
+  console.log('\tuuid = 0x%s', uuid.toString(16));
+  console.log('\tdata = %s', data.toString('hex'));
+
+  if (uuid === 0x2800) {
+    // service
+    console.log('\t\tservice: 0x%s', data.readUInt16LE(0).toString(16));
+  } else if (uuid === 0x2803) {
+    // characteristic
+    console.log('\t\tcharacteristic: 0x%s', data.readUInt16LE(3).toString(16));
+    console.log('\t\tvalue handle: 0x%s', data.readUInt16LE(1).toString(16));
+  } else {
+    // value
+    console.log('\t\tvalue = %s', data.toString('hex'));
+  }
+
+  console.log();
+}
+
+
+// crc
+var crc = crc.crc16ccitt(inputBuffer.slice(0, inputBuffer.length - 2));
+var expectedCrc = inputBuffer.slice(inputBuffer.length - 2).toString('hex');
+
+console.log('crc = %s %s', crc.toString(16), expectedCrc);
